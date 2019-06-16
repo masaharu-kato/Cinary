@@ -51,6 +51,14 @@ namespace cinary {
 		//	writeType<Type>();
 			writeValue(obj);
 		}
+
+		template <class First, class Second>
+		void write(std::pair<First, Second> pair)
+		{
+			wruteType<decltype(pair)>();
+			writeValue(pair.first);
+			writeValue(pair.second);
+		}
 		
 		template <class T> void write(std::unique_ptr<T> ptr){ writePtr(ptr); }
 		template <class T> void write(std::shared_ptr<T> ptr){ writePtr(ptr); }
