@@ -3,8 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("cinary_in")
-project ("cinary_out")
+project ("sample")
 
 # サブプロジェクトを含めます。
 add_subdirectory ("src")

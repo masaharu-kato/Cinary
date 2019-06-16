@@ -1,3 +1,5 @@
+#include <type_traits>
+
 namespace Cinary {
 
 	template<typename T, typename _ = void>
@@ -19,7 +21,7 @@ namespace Cinary {
 				//	typename T::const_iterator,
 				//	decltype(std::declval<T>().size()),
 					decltype(std::declval<T>().begin()),
-					decltype(std::declval<T>().end()),
+					decltype(std::declval<T>().end()) //,
 				//	decltype(std::declval<T>().cbegin()),
 				//	decltype(std::declval<T>().cend())
 					>,
