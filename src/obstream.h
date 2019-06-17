@@ -10,38 +10,42 @@ namespace cinary {
 		using OSPtr = std::shared_ptr<std::ostream>;
 
 	private:
+	//	標準出力ストリームのポインタ
 		OSPtr os;
 
+	public:
+		OutputBinaryStream(OSPtr os)
+			: os(os) {}
+
+	//	データの書き込み
+		template <class T>
+		void write(const char* name, const T& val);
+
+		//template <class First, class... Rests>
+		//void write(const First& first, Rests&&... rests)
+		//{
+		//	write(first);
+		//	wirte(rests...);
+		//}
+
+	private:
+
+	//	型情報の書き込み
 		template <class Type>
 		void writeType(size_t n = 0);
 
+	//	
 		template <class Type>
-		void writeValue(Type obj)
+		void writeValue(const Type& obj)
 		{
 			os->write((Byte*)&obj, sizeof(obj));
 		}
 
 		template <class Ptr>
 		void writePtr(Ptr ptr);
+		
 
-	public:
-		OutputBinaryStream(OSPtr os)
-			: os(os) {}
-
-		template <class... Args>
-		This& operator <<(Args... args)
-		{
-			write(args...);
-			return *this;
-		}
-
-		template <class First, class... Rests>
-		void write(const First& first, Rests&&... rests)
-		{
-			write(first);
-			wirte(rests...);
-		}
-
+	protected:
 
 		template <class Type>
 		void write(const Type& obj)
@@ -55,7 +59,7 @@ namespace cinary {
 		template <class First, class Second>
 		void write(std::pair<First, Second> pair)
 		{
-			wruteType<decltype(pair)>();
+			writeType<decltype(pair)>();
 			writeValue(pair.first);
 			writeValue(pair.second);
 		}
@@ -80,5 +84,7 @@ namespace cinary {
 		}
 
 	};
+
+	using OBStream = OutputBinaryStream;
 
 }

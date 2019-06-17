@@ -3,10 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-add_executable (sample_in "sample_in.cpp")
-
-add_executable (sample_out "sample_out.cpp")
-
-add_executable (sample_any "sample_any.cpp")
+# ソースをこのプロジェクトの実行可能ファイルに追加します。
+add_executable (trial "map_output.cpp")
 
 # TODO: テストを追加し、必要な場合は、ターゲットをインストールします。

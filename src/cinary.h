@@ -1,8 +1,5 @@
-﻿// cinary.h : 標準のシステム インクルード ファイル用のインクルード ファイル、
-// または、プロジェクト専用のインクルード ファイル。
+﻿// #pragma once
 
-#pragma once
+#include "ibstream.h"
+#include "obstream.h"
 
-#include <iostream>
-
-// TODO: プログラムに必要な追加ヘッダーをここで参照します。

@@ -1,5 +1,6 @@
 #pragma once
 #include "bstream.h"
+#include "FixedAny.h"
 #include <vector>
 
 namespace cinary {
@@ -16,6 +17,8 @@ namespace cinary {
 	public:
 		InputBinaryStream(ISPtr is)
 			: is(is) {}
+
+		FixedAny operator [](const char* name);
 
 	protected:
 		template <class Type>
@@ -58,5 +61,7 @@ namespace cinary {
 		//}
 
 	};
+
+	using IBStream = InputBinaryStream;
 
 }

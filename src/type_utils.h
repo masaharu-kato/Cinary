@@ -1,6 +1,6 @@
 #include <type_traits>
 
-namespace Cinary {
+namespace cinary {
 
 	template<typename T, typename _ = void>
 	struct is_container : std::false_type {};
