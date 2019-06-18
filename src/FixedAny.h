@@ -18,7 +18,8 @@ namespace cinary {
 		//	参照型かどうか
 			virtual bool isReference() const noexcept = 0;
 
-		//	constかどうか
+		//	const修飾かどうか
+			virtual bool isConst() const noexcept = 0;
 
 
 		};
@@ -60,18 +61,29 @@ namespace cinary {
 			virtual bool isReference() const noexcept = 0 {
 				return std::is_reference<Type>::value;
 			}
+
+		//	const修飾かどうか
+			virtual bool isConst() const noexcept = 0 {
+				return std::is_const<Type>::value;
+			}
 		};
 
 	//	データ保管変数
 		std::unique_ptr<PlaceHolder> context;
 
-
-	//	データ保管変数を指定した型に変換（できない場合は例外を送出）
-		template <class T>
-		T cast_context() const
+		
+	//	データ保管変数を指定した型に変換（context が無効値の場合や変換できない場合は例外を送出）
+		template <class _T>
+		_T& cast_context()
 		{
-			if(!context) throw std::runtime_error("This value is not available.");
-			return dynamic_cast<T>(*context.get());
+			return dynamic_cast<Holder<_T>&>(*context.get());
+		}
+		
+	//	データ保管変数を指定した型に変換（context が無効値の場合や変換できない場合は例外を送出）
+		template <class _T>
+		const _T& cast_context() const
+		{
+			return dynamic_cast<const Holder<_T>&>(*context.get());
 		}
 
 	
@@ -100,32 +112,71 @@ namespace cinary {
 			return new FixedAny(TypeOf<Type>(), args...);
 		}
 
-	//	無効値であれば偽を返す
-		explicit operator bool() const
+
+	//	データ保管変数を指定した型で取得（できない場合は例外を送出）
+		template <class T>
+		T& getContext()
 		{
-			return (bool)context;
+		//	無効値の場合例外を送出
+			if(!context) throw std::runtime_error("This value is not available.");
+			
+		//	保管している型の参照やconstの有無によってキャスト先の型を変える
+			if(context->isReference()){
+				if(context->isConst()) {
+					return cast_context<const T&>();
+				}else{
+					return cast_context<T&>();
+				}
+			}
+
+			if(context->isConst()) return cast_context<const T>();
+			
+			return cast_context<T>();
 		}
+
+	//	データ保管変数を指定した型で取得（できない場合は例外を送出）
+		template <class T>
+		const T& getContext() const
+		{
+		//	無効値の場合例外を送出
+			if(!context) throw std::runtime_error("This value is not available.");
+			
+		//	保管している型の参照やconstの有無によってキャスト先の型を変える
+			if(context->isReference()){
+				if(context->isConst()) {
+					return cast_context<const T&>();
+				}else{
+					return cast_context<T&>();
+				}
+			}
+
+			if(context->isConst()) return cast_context<const T>();
+			
+			return cast_context<T>();
+		}
+
 
 	//	変更可能なデータの取得（指定した型に変換できない場合は例外を送出）
 		template <class Type>
 		operator Type&()
 		{
-		//	無効値の場合例外を送出
-			if(!context) throw std::runtime_error("This value is not available.");
-			
-		//	保管している型が参照型の場合そのまま返す
-			if(context->isReference()) return dynamic_cast<Holder<Type&>&>(*context.get());
-			
-			return dynamic_cast<Holder<Type>&>(*context.get());
+			return getContext<Type>();
 		}
 
 	//	読み取り用データの取得（指定した型に変換できない場合は例外を送出）
 		template <class Type>
 		operator const Type&() const
 		{
-			if(!context) throw std::runtime_error("This value is not available.");
-			return dynamic_cast<const Holder<Type>&>(*context.get());
+			return getContext<Type>();
 		}
+
+
+	//	無効値であれば偽を返す
+		explicit operator bool() const
+		{
+			return (bool)context;
+		}
+
 
 	//	OR演算子による既定値の設定
 		template <class Type>

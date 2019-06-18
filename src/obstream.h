@@ -1,5 +1,6 @@
 #pragma once
 #include "bstream.h"
+#include "FixedAny.h"
 
 namespace cinary {
 	
@@ -18,8 +19,11 @@ namespace cinary {
 			: os(os) {}
 
 	//	データの書き込み
-		template <class T>
-		void write(const char* name, const T& val);
+		//template <class T>
+		//void write(const char* name, const T& val);
+
+	//	初期化子リストによるデータの書き込み
+		void write(std::initializer_list<std::pair<const char*, FixedAny>>&);
 
 		//template <class First, class... Rests>
 		//void write(const First& first, Rests&&... rests)
