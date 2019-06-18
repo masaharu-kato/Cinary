@@ -14,14 +14,21 @@ namespace cinary {
 		public:
 		//	型情報の取得
 			virtual const std::type_info& getType() const noexcept = 0;
+
+		//	参照型かどうか
+			virtual bool isReference() const noexcept = 0;
+
+		//	constかどうか
+
+
 		};
 
 	//	データ保管クラス
-		template <class T>
+		template <class Type>
 		class Holder : public PlaceHolder {
 		private:
 		//	データ
-			T val;
+			Type val;
 
 		public:	
 		//	データの直接構築
@@ -31,15 +38,15 @@ namespace cinary {
 			{}
 
 		//	変更可能なデータを取得
-			template <class Type>
-			operator Type&() noexcept
+			template <class T>
+			operator T&() noexcept
 			{
 				return val;
 			}
 
 		//	読み取り用のデータを取得
-			template <class Type>
-			operator const Type&() const noexcept
+			template <class T>
+			operator const T&() const noexcept
 			{
 				return val;
 			}
@@ -48,20 +55,35 @@ namespace cinary {
 			const std::type_info& getType() const noexcept override {
 				return typeid(T);
 			}
+
+		//	参照型かどうか
+			virtual bool isReference() const noexcept = 0 {
+				return std::is_reference<Type>::value;
+			}
 		};
 
 	//	データ保管変数
 		std::unique_ptr<PlaceHolder> context;
+
+
+	//	データ保管変数を指定した型に変換（できない場合は例外を送出）
+		template <class T>
+		T cast_context() const
+		{
+			if(!context) throw std::runtime_error("This value is not available.");
+			return dynamic_cast<T>(*context.get());
+		}
+
 	
 	public:
 	//	無効値として構築
 		FixedAny() noexcept = default;
 
 	//	構築済みの任意の型から構築
-		template <class Type>
-		FixedAny(const Type& type) noexcept
+		template <class T>
+		FixedAny(const T& type) noexcept
 		{
-			context.reset(new Holder<Type>(type));
+			context.reset(new Holder<T>(type));
 		}
 
 	//	1つ目の引数に指定した型を2つ目以降の引数を用いて直接構築
@@ -88,7 +110,12 @@ namespace cinary {
 		template <class Type>
 		operator Type&()
 		{
+		//	無効値の場合例外を送出
 			if(!context) throw std::runtime_error("This value is not available.");
+			
+		//	保管している型が参照型の場合そのまま返す
+			if(context->isReference()) return dynamic_cast<Holder<Type&>&>(*context.get());
+			
 			return dynamic_cast<Holder<Type>&>(*context.get());
 		}
 
